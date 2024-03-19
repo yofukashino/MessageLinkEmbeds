@@ -1,3 +1,6 @@
-export const applyInjections = (): void => {};
+import patchMessageAccessories from "./MessageAccessories";
+export const applyInjections = (): void => {
+  patchMessageAccessories();
+};
 
 export default { applyInjections };

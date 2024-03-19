@@ -1,6 +1,8 @@
-import { settings, util } from "replugged";
-import { React, lodash } from "replugged/common";
+import { util } from "replugged";
+import { guilds as UltimateGuildStore, users as UltimateUserStore } from "replugged/common";
 import { PluginInjector } from "../index";
+import { TenorRegex } from "./consts";
+import { IconUtils } from "./requiredModules";
 import Types from "../types";
 
 export const forceRerenderElement = async (selector: string): Promise<void> => {
@@ -13,52 +15,93 @@ export const forceRerenderElement = async (selector: string): Promise<void> => {
   });
   ownerInstance.forceUpdate(() => ownerInstance.forceUpdate(() => {}));
 };
-export const useSetting = <
-  T extends Record<string, Types.Jsonifiable>,
-  D extends keyof T,
-  K extends Extract<keyof T, string>,
-  F extends Types.NestedType<T, P> | T[K] | undefined,
-  P extends `${K}.${string}` | K,
->(
-  settings: settings.SettingsManager<T, D>,
-  key: P,
-  fallback?: F,
-): {
-  value: Types.NestedType<T, P> | F;
-  onChange: (newValue: Types.ValType<Types.NestedType<T, P> | F>) => void;
-} => {
-  const [initialKey, ...pathArray] = Object.keys(settings.all()).includes(key)
-    ? ([key] as [K])
-    : (key.split(".") as [K, ...string[]]);
-  const path = pathArray.join(".");
-  const initial = settings.get(initialKey, path.length ? ({} as T[K]) : (fallback as T[K]));
-  const [value, setValue] = React.useState<Types.NestedType<T, P>>(
-    path.length
-      ? (lodash.get(initial, path, fallback) as Types.NestedType<T, P>)
-      : (initial as Types.NestedType<T, P>),
+export const getChannelIconAndType = ({ channel }: { channel: Types.Channel }): string[] => {
+  switch (true) {
+    case channel.isDM():
+      return [
+        IconUtils.getUserAvatarURL(UltimateUserStore.getUser(channel.recipients[0])) as string,
+        "Direct Message",
+      ];
+
+    case channel.isGroupDM():
+      return [IconUtils.default.getChannelIconURL(channel) as string, "Group DM"];
+    case true:
+      return [
+        IconUtils.default.getGuildIconURL(UltimateGuildStore.getGuild(channel.guild_id)) as string,
+        "Server",
+      ];
+  }
+};
+
+export const needsRichEmbed = (message: Types.Message): boolean =>
+  Boolean(
+    message.components.length ||
+      message.attachments.some((a) => !a.content_type?.startsWith("image/")) ||
+      message.embeds.some(
+        (e) => e.type !== "image" && (e.type !== "gifv" || TenorRegex.test(e.url)),
+      ),
   );
+export const getMessageImages = (
+  message: Types.Message,
+): Array<{ proxyURL?: string; url: string; width: number; height: number }> =>
+  (message.attachments ?? [])
+    .filter(({ content_type }) => content_type?.startsWith("image/"))
+    .map(({ height, width, url, proxy_url }) => ({ height, width, url, proxyURL: proxy_url }))
+    .concat(
+      (message.embeds ?? [])
+        .filter(
+          ({ type, url }) => type === "image" || (url && type === "gifv" && !TenorRegex.test(url)),
+        )
+        .map(({ image, thumbnail, url, type }) =>
+          type === "image"
+            ? { ...(image ?? thumbnail) }
+            : { height: thumbnail.height, width: thumbnail.width, url, proxyURL: url },
+        ),
+    );
 
+export const formatEmptyContent = ({
+  attachments,
+  embeds,
+}: {
+  attachments: number;
+  embeds: number;
+}): string =>
+  !attachments && !embeds
+    ? ""
+    : !attachments
+      ? `[${embeds} embed${embeds !== 1 ? "s" : ""}]`
+      : !embeds
+        ? `[${attachments} attachment${attachments !== 1 ? "s" : ""}]`
+        : `[${attachments} attachment${attachments !== 1 ? "s" : ""} and ${embeds} embed${embeds !== 1 ? "s" : ""}]`;
+export const resizeToFit = ({
+  width,
+  height,
+}: {
+  width: number;
+  height: number;
+}): { width: number; height: number } => {
+  const maxWidth = 400;
+  const maxHeight = 300;
+  if (width !== maxWidth || height !== maxHeight) {
+    const scaledWidth = width > maxWidth ? maxWidth / width : 1;
+    width = Math.max(Math.round(width * scaledWidth), 0);
+    height = Math.max(Math.round(height * scaledWidth), 0);
+    const scaledHeight = height > maxHeight ? maxHeight / height : 1;
+    width = Math.max(Math.round(width * scaledHeight), 0);
+    height = Math.max(Math.round(height * scaledHeight), 0);
+  }
   return {
-    value,
-    onChange: (newValue: Types.ValType<Types.NestedType<T, P> | F>) => {
-      const isObj = newValue && typeof newValue === "object";
-      const value = isObj && "value" in newValue ? newValue.value : newValue;
-      const checked = isObj && "checked" in newValue ? newValue.checked : void 0;
-      const target =
-        isObj && "target" in newValue && newValue.target && typeof newValue.target === "object"
-          ? newValue.target
-          : void 0;
-      const targetValue = target && "value" in target ? target.value : void 0;
-      const targetChecked = target && "checked" in target ? target.checked : void 0;
-      const finalValue = checked ?? targetChecked ?? targetValue ?? value ?? newValue;
-
-      setValue(finalValue as Types.NestedType<T, P>);
-      settings.set(
-        initialKey,
-        path.length ? (lodash.set(initial, path, finalValue) as T[K]) : (finalValue as T[K]),
-      );
-    },
+    width,
+    height,
   };
 };
 
-export default { ...util, forceRerenderElement, useSetting };
+export default {
+  ...util,
+  forceRerenderElement,
+  getChannelIconAndType,
+  needsRichEmbed,
+  getMessageImages,
+  formatEmptyContent,
+  resizeToFit,
+};

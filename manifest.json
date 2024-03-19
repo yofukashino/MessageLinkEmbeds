@@ -1,22 +1,20 @@
 {
-    "id":  "dev.tharki.MessageLinkEmbeds",
-    "name":  "MessageLinkEmbeds",
-    "description":  "Actually embeds message link instead of whatever discord do.",
-    "author":  {
-                   "discordID":  "1121961711080050780",
-                   "name":  "Ahlawat",
-                   "github":  "YofukashiNo"
-               },
-    "version":  "1.0.0",
-    "updater":  {
-                    "id":  "YofukashiNo/MessageLinkEmbeds",
-                    "type":  "github"
-                },
-    "license":  "MIT",
-    "type":  "replugged-plugin",
-    "renderer":  "src/index.ts",
-    "source":  "https://github.com/YofukashiNo/MessageLinkEmbeds",
-    "image":  [
-                  "https://i.imgur.com/14CNs3a.png?CHANGE-THIS-URL"
-              ]
+  "id": "dev.yofukashino.MessageLinkEmbeds",
+  "name": "MessageLinkEmbeds",
+  "description": "Actually embeds message link instead of whatever discord do.",
+  "author": {
+    "discordID": "1121961711080050780",
+    "name": "Nanakusa",
+    "github": "YofukashiNo"
+  },
+  "version": "1.0.0",
+  "updater": {
+    "id": "YofukashiNo/MessageLinkEmbeds",
+    "type": "github"
+  },
+  "license": "MIT",
+  "type": "replugged-plugin",
+  "renderer": "src/index.ts",
+  "source": "https://github.com/YofukashiNo/MessageLinkEmbeds",
+  "image": ["https://i.imgur.com/14CNs3a.png?CHANGE-THIS-URL"]
 }
