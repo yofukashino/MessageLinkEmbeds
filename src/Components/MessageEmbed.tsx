@@ -35,12 +35,27 @@ export default React.memo(({ message }: { message: Types.Message }) => {
           return null;
         }
         const message = UltimateMessageStore.getMessage(channelId, messageId);
+        if (
+          message &&
+          Array.from(message.content?.matchAll(RegExp(MessageLinkRegex, "g"))).some(
+            ([, , messageId]) => messageId === parentMessage.id,
+          )
+        )
+          return null;
         if (message) return { message, channel };
         if (isFetching.has(`${channelId}-${messageId}`)) {
           while (isFetching.has(`${channelId}-${messageId}`)) {
             await Utils.sleep(100);
           }
-          return { message: UltimateMessageStore.getMessage(channelId, messageId), channel };
+          const message = UltimateMessageStore.getMessage(channelId, messageId);
+          if (
+            message &&
+            Array.from(message.content?.matchAll(RegExp(MessageLinkRegex, "g"))).some(
+              ([, , messageId]) => messageId === parentMessage.id,
+            )
+          )
+            return null;
+          return { message, channel };
         }
         isFetching.add(`${channelId}-${messageId}`);
         await UltimateMessageStore.fetchMessages({
@@ -49,7 +64,17 @@ export default React.memo(({ message }: { message: Types.Message }) => {
           jump: { messageId, flash: false },
         });
         isFetching.delete(`${channelId}-${messageId}`);
-        return { message: UltimateMessageStore.getMessage(channelId, messageId), channel };
+        {
+          const message = UltimateMessageStore.getMessage(channelId, messageId);
+          if (
+            message &&
+            Array.from(message.content?.matchAll(RegExp(MessageLinkRegex, "g"))).some(
+              ([, , messageId]) => messageId === parentMessage.id,
+            )
+          )
+            return null;
+          return { message, channel };
+        }
       });
       const messages = await Promise.all(messagePromises);
       setMessages(messages.filter(Boolean));
