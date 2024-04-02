@@ -7,7 +7,7 @@
     "name": "Nanakusa",
     "github": "YofukashiNo"
   },
-  "version": "1.0.1",
+  "version": "1.0.2",
   "updater": {
     "id": "dev.yofukashino.MessageLinkEmbeds",
     "type": "store"
@@ -16,5 +16,7 @@
   "type": "replugged-plugin",
   "renderer": "src/index.ts",
   "source": "https://github.com/YofukashiNo/MessageLinkEmbeds",
-  "image": ["https://i.imgur.com/EEPUbU5.pngL"]
+  "image": [
+    "https://i.imgur.com/EEPUbU5.pngL"
+  ]
 }
