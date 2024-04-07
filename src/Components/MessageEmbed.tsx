@@ -77,7 +77,7 @@ export default React.memo(({ message }: { message: Types.Message }) => {
         }
       });
       const messages = await Promise.all(messagePromises);
-      setMessages(messages.filter(Boolean));
+      setMessages(messages.filter(Boolean).filter((m) => m.message && m.channel));
     };
     getAndSetMessages();
   }, [JSON.stringify(messageIds)]);
