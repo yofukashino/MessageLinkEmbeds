@@ -1,6 +1,6 @@
 {
   "name": "message-link-embeds",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Actually embeds message link instead of whatever discord do.",
   "engines": {
     "node": ">=20.0.0",
