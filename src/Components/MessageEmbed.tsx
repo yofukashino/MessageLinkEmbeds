@@ -47,7 +47,9 @@ export default React.memo(({ message }: { message: Types.Message }) => {
           while (isFetching.has(`${channelId}-${messageId}`)) {
             await Utils.sleep(100);
           }
-          const message = UltimateMessageStore.getMessage(channelId, messageId);
+          const message =
+            UltimateMessageStore.getMessage(channelId, messageId) ??
+            Utils.messageCache.get(`${channelId}-${messageId}`);
           if (
             message &&
             Array.from(message.content?.matchAll(RegExp(MessageLinkRegex, "g"))).some(
@@ -58,14 +60,15 @@ export default React.memo(({ message }: { message: Types.Message }) => {
           return { message, channel };
         }
         isFetching.add(`${channelId}-${messageId}`);
-        await UltimateMessageStore.fetchMessages({
+        await Utils.fetchMessage({
           channelId,
-          limit: 1,
-          jump: { messageId, flash: false },
+          messageId,
         });
         isFetching.delete(`${channelId}-${messageId}`);
         {
-          const message = UltimateMessageStore.getMessage(channelId, messageId);
+          const message =
+            UltimateMessageStore.getMessage(channelId, messageId) ??
+            Utils.messageCache.get(`${channelId}-${messageId}`);
           if (
             message &&
             Array.from(message.content?.matchAll(RegExp(MessageLinkRegex, "g"))).some(

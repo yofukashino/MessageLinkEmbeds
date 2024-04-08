@@ -1,9 +1,21 @@
 import { util } from "replugged";
-import { guilds as UltimateGuildStore, users as UltimateUserStore } from "replugged/common";
-import { PluginInjector } from "../index";
+import {
+  fluxDispatcher as FluxDispatcher,
+  guilds as UltimateGuildStore,
+  messages as UltimateMessageStore,
+  users as UltimateUserStore,
+} from "replugged/common";
+import { PluginInjector, PluginLogger } from "../index";
 import { TenorRegex } from "./consts";
-import { IconUtils } from "./requiredModules";
+import {
+  APIRequestUtils,
+  DiscordConstants,
+  IconUtils,
+  MessageCacheActions,
+} from "./requiredModules";
 import Types from "../types";
+
+export const messageCache = new Map<string, Types.Message>();
 
 export const forceRerenderElement = async (selector: string): Promise<void> => {
   const element = await util.waitFor(selector);
@@ -96,12 +108,44 @@ export const resizeToFit = ({
   };
 };
 
+export const fetchMessage = async ({ channelId, messageId }): Promise<Types.Message> => {
+  PluginLogger.log(
+    `Fetching message for messageId: ${messageId} channelId: ${channelId} at ${Date.now()}`,
+  );
+  const cachedMessage =
+    UltimateMessageStore.getMessage(channelId, messageId) ??
+    messageCache.get(`${channelId}-${messageId}`);
+  if (cachedMessage) return cachedMessage;
+  const channelMessages = MessageCacheActions.getOrCreate(channelId);
+
+  FluxDispatcher.dispatch({
+    type: "LOAD_MESSAGES",
+  });
+  const message = await APIRequestUtils.HTTP.get({
+    // eslint-disable-next-line new-cap
+    url: DiscordConstants.Endpoints.MESSAGES(channelId),
+    query: {
+      limit: "1",
+      around: messageId,
+    },
+    retries: 2,
+    oldFormErrors: !0,
+  }).then(({ body }) => channelMessages.receiveMessage(body[0] as Types.Message).get(messageId));
+  messageCache.set(`${channelId}-${messageId}`, message);
+  PluginLogger.log(
+    `Fetched message for messageId: ${messageId} channelId: ${channelId} at ${Date.now()}`,
+  );
+  return message;
+};
+
 export default {
   ...util,
+  messageCache,
   forceRerenderElement,
   getChannelIconAndType,
   needsRichEmbed,
   getMessageImages,
   formatEmptyContent,
   resizeToFit,
+  fetchMessage,
 };

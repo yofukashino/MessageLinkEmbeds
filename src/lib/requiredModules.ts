@@ -28,3 +28,8 @@ export const MessageClasses = {
   ...webpack.getByProps<Types.SearchMessageClasses>("message", "searchResult"),
   ...webpack.getByProps<Types.EmbedClasses>("embedAuthorIcon", "embedAuthor", "embedAuthor"),
 };
+
+export const MessageCacheActions =
+  webpack.getBySource<Types.ChannelMessages>("this.revealedMessageId");
+
+export const APIRequestUtils = webpack.getByProps<Types.APIRequestUtils>("getAPIBaseURL", "HTTP");
