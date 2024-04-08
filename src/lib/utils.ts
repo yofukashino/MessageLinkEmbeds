@@ -110,7 +110,7 @@ export const resizeToFit = ({
 
 export const fetchMessage = async ({ channelId, messageId }): Promise<Types.Message> => {
   PluginLogger.log(
-    `Fetching message for messageId: ${messageId} channelId: ${channelId} at ${Date.now()}`,
+    `Fetching message for messageId: ${messageId} channelId: ${channelId} at ${new Date()}`,
   );
   const cachedMessage =
     UltimateMessageStore.getMessage(channelId, messageId) ??
@@ -121,6 +121,8 @@ export const fetchMessage = async ({ channelId, messageId }): Promise<Types.Mess
   FluxDispatcher.dispatch({
     type: "LOAD_MESSAGES",
   });
+
+  const fetchStart = performance.now();
   const message = await APIRequestUtils.HTTP.get({
     // eslint-disable-next-line new-cap
     url: DiscordConstants.Endpoints.MESSAGES(channelId),
@@ -132,8 +134,9 @@ export const fetchMessage = async ({ channelId, messageId }): Promise<Types.Mess
     oldFormErrors: !0,
   }).then(({ body }) => channelMessages.receiveMessage(body[0] as Types.Message).get(messageId));
   messageCache.set(`${channelId}-${messageId}`, message);
+  const fetchEnd = performance.now();
   PluginLogger.log(
-    `Fetched message for messageId: ${messageId} channelId: ${channelId} at ${Date.now()}`,
+    `Fetched message for messageId: ${messageId} channelId: ${channelId} at ${new Date()} in ${(fetchEnd - fetchStart).toFixed(2)}ms.`,
   );
   return message;
 };
