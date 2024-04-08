@@ -15,7 +15,26 @@ import {
 } from "./requiredModules";
 import Types from "../types";
 
-export const messageCache = new Map<string, Types.Message>();
+export class LimitedMap<K, V> extends Map<K, V> {
+  private limit: number;
+  private keysQueue: K[] = [];
+  public constructor(limit: number) {
+    super();
+    this.limit = limit;
+  }
+  public set(key: K, value: V): this {
+    if (this.size >= this.limit) {
+      const oldestKey = this.keysQueue.shift();
+      if (oldestKey !== void 0) {
+        this.delete(oldestKey);
+      }
+    }
+    super.set(key, value);
+    this.keysQueue.push(key);
+    return this;
+  }
+}
+export const messageCache = new LimitedMap<string, Types.Message>(150);
 
 export const forceRerenderElement = async (selector: string): Promise<void> => {
   const element = await util.waitFor(selector);
@@ -143,6 +162,7 @@ export const fetchMessage = async ({ channelId, messageId }): Promise<Types.Mess
 
 export default {
   ...util,
+  LimitedMap,
   messageCache,
   forceRerenderElement,
   getChannelIconAndType,
