@@ -978,9 +978,23 @@ export namespace Types {
     {
       getSetting: DefaultTypes.AnyFunction;
       updateSetting: DefaultTypes.AnyFunction;
-      useSetting: DefaultTypes.AnyFunction;
+      useSetting: () => boolean;
     }
   >;
+  export interface Modules {
+    loadModules?: () => Promise<void>;
+    MessageAccessories?: DefaultTypes.AnyFunction;
+    DiscordConstants?: DiscordConstants;
+    PermissionStore?: PermissionStore;
+    RichEmbed?: Embeds["default"];
+    AutomodEmbed?: AutomodEmbed;
+    ChannelMessage?: ChannelMessage;
+    IconUtils?: IconUtils;
+    ChatSettingUtils?: ChatSettingUtils;
+    MessageClasses?: SearchMessageClasses & EmbedClasses;
+    MessageCacheActions?: ChannelMessages;
+    APIRequestUtils?: APIRequestUtils;
+  }
   export interface Settings {
     background: string;
     automodEmbed: string;

@@ -1,6 +1,6 @@
 import { Injector, Logger, settings } from "replugged";
 import { defaultSettings } from "./lib/consts";
-import { registerSettings } from "./Components/Settings";
+import Settings from "./Components/Settings";
 export const PluginInjector = new Injector();
 export const { utils: PluginInjectorUtils } = PluginInjector;
 export const PluginLogger = Logger.plugin("MessageLinkEmbeds", "#b380ff");
@@ -9,10 +9,10 @@ export const SettingValues = await settings.init(
   defaultSettings,
 );
 
-import Injections from "./patches/index";
+import Injections from "./injections/index";
 
 export const start = (): void => {
-  registerSettings();
+  Settings.registerSettings();
   Injections.applyInjections();
 };
 

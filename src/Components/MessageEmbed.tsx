@@ -4,7 +4,7 @@ import {
   messages as UltimateMessageStore,
 } from "replugged/common";
 import { MessageLinkRegex, defaultSettings } from "../lib/consts";
-import { DiscordConstants, PermissionStore } from "../lib/requiredModules";
+import Modules from "../lib/requiredModules";
 import Types from "../types";
 import RichMessageEmbed from "./RichMessageEmbed";
 import AutomodMessageEmbed from "./AutomodMessageEmbed";
@@ -30,7 +30,10 @@ export default React.memo(({ message }: { message: Types.Message }) => {
           messageId === parentMessage.id ||
           !channel ||
           (!channel.isPrivate() &&
-            !PermissionStore.can(DiscordConstants.Permissions.VIEW_CHANNEL, channel))
+            !Modules.PermissionStore.can(
+              Modules.DiscordConstants.Permissions.VIEW_CHANNEL,
+              channel,
+            ))
         ) {
           return null;
         }

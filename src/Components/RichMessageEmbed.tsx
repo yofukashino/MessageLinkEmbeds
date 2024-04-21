@@ -1,7 +1,7 @@
 import { parser as Parser, React, users as UltimateUserStore } from "replugged/common";
 import { Text } from "replugged/components";
 import { SettingValues } from "../index";
-import { ChannelMessage, MessageClasses, RichEmbed } from "../lib/requiredModules";
+import Modules from "../lib/requiredModules";
 import Utils from "../lib/utils";
 import Types from "../types";
 import { defaultSettings } from "../lib/consts";
@@ -13,7 +13,7 @@ export default React.memo(
     const [icon, type] = Utils.getChannelIconAndType({ channel });
 
     return (
-      <RichEmbed
+      <Modules.RichEmbed
         embed={{
           rawDescription: "",
           color: "var(--background-secondary)",
@@ -30,8 +30,8 @@ export default React.memo(
         renderDescription={() => (
           <div
             key={message.id}
-            className={`${MessageClasses.message}${SettingValues.get("background", defaultSettings.background) ? ` ${MessageClasses.searchResult}` : ""}`}>
-            <ChannelMessage
+            className={`${Modules.MessageClasses.message}${SettingValues.get("background", defaultSettings.background) ? ` ${Modules.MessageClasses.searchResult}` : ""}`}>
+            <Modules.ChannelMessage
               id={`message-link-embeds-${message.id}`}
               message={message}
               channel={channel}

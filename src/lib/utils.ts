@@ -7,12 +7,7 @@ import {
 } from "replugged/common";
 import { PluginInjector, PluginLogger } from "../index";
 import { TenorRegex } from "./consts";
-import {
-  APIRequestUtils,
-  DiscordConstants,
-  IconUtils,
-  MessageCacheActions,
-} from "./requiredModules";
+import Modules from "./requiredModules";
 import Types from "../types";
 
 export class LimitedMap<K, V> extends Map<K, V> {
@@ -47,6 +42,7 @@ export const forceRerenderElement = async (selector: string): Promise<void> => {
   ownerInstance.forceUpdate(() => ownerInstance.forceUpdate(() => {}));
 };
 export const getChannelIconAndType = ({ channel }: { channel: Types.Channel }): string[] => {
+  const { IconUtils } = Modules;
   switch (true) {
     case channel.isDM():
       return [
@@ -128,6 +124,7 @@ export const resizeToFit = ({
 };
 
 export const fetchMessage = async ({ channelId, messageId }): Promise<Types.Message> => {
+  const { APIRequestUtils, DiscordConstants, MessageCacheActions } = Modules;
   PluginLogger.log(
     `Fetching message for messageId: ${messageId} channelId: ${channelId} at ${new Date()}`,
   );

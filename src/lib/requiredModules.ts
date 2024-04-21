@@ -1,35 +1,50 @@
 import { webpack } from "replugged";
 import Types from "../types";
 
-export const { MessageAccessories } =
-  webpack.getByProps<Types.MessageAccessories>("MessageAccessories");
+export const Modules: Types.Modules = {};
 
-export const DiscordConstants = webpack.getByProps<Types.DiscordConstants>(
-  "Permissions",
-  "ChannelTypes",
-);
-export const PermissionStore = webpack.getByStoreName<Types.PermissionStore>("PermissionStore");
+Modules.loadModules = async (): Promise<void> => {
+  Modules.MessageAccessories ??= await webpack
+    .waitForProps<Types.MessageAccessories>("MessageAccessories")
+    .then(({ MessageAccessories }) => MessageAccessories);
 
-export const { default: RichEmbed } = webpack.getBySource<Types.Embeds>(
-  "this.renderEmbedContent()",
-);
+  Modules.DiscordConstants ??= await webpack.waitForProps<Types.DiscordConstants>(
+    "Permissions",
+    "ChannelTypes",
+  );
 
-export const AutomodEmbed = webpack.getBySource<Types.AutomodEmbed>(
-  /\.messageContainer,{\[\w+.compact/,
-);
+  Modules.RichEmbed ??= await webpack
+    .waitForModule<Types.Embeds>(webpack.filters.bySource("this.renderEmbedContent()"))
+    .then(({ default: RichEmbed }) => RichEmbed);
 
-export const ChannelMessage = webpack.getBySource<Types.ChannelMessage>(".hideAccessories?void 0");
+  Modules.AutomodEmbed ??= await webpack.waitForModule<Types.AutomodEmbed>(
+    webpack.filters.bySource(/\.messageContainer,{\[\w+.compact/),
+  );
 
-export const IconUtils = webpack.getByProps<Types.IconUtils>("getUserAvatarURL");
+  Modules.ChannelMessage ??= await webpack.waitForModule<Types.ChannelMessage>(
+    webpack.filters.bySource(".hideAccessories?void 0"),
+  );
 
-export const ChatSettingUtils = webpack.getByProps<Types.ChatSettingUtils>("MessageDisplayCompact");
+  Modules.IconUtils ??= await webpack.waitForProps<Types.IconUtils>("getUserAvatarURL");
 
-export const MessageClasses = {
-  ...webpack.getByProps<Types.SearchMessageClasses>("message", "searchResult"),
-  ...webpack.getByProps<Types.EmbedClasses>("embedAuthorIcon", "embedAuthor", "embedAuthor"),
+  Modules.ChatSettingUtils ??=
+    await webpack.waitForProps<Types.ChatSettingUtils>("MessageDisplayCompact");
+
+  Modules.MessageClasses = {
+    ...webpack.getByProps<Types.SearchMessageClasses>("message", "searchResult"),
+    ...webpack.getByProps<Types.EmbedClasses>("embedAuthorIcon", "embedAuthor", "embedAuthor"),
+  };
+
+  Modules.MessageCacheActions ??= await webpack.waitForModule<Types.ChannelMessages>(
+    webpack.filters.bySource("this.revealedMessageId"),
+  );
+
+  Modules.APIRequestUtils ??= await webpack.waitForProps<Types.APIRequestUtils>(
+    "getAPIBaseURL",
+    "HTTP",
+  );
+
+  Modules.PermissionStore ??= webpack.getByStoreName<Types.PermissionStore>("PermissionStore");
 };
 
-export const MessageCacheActions =
-  webpack.getBySource<Types.ChannelMessages>("this.revealedMessageId");
-
-export const APIRequestUtils = webpack.getByProps<Types.APIRequestUtils>("getAPIBaseURL", "HTTP");
+export default Modules;
