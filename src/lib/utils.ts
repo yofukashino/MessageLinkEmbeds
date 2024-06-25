@@ -1,10 +1,10 @@
 import { util } from "replugged";
 import {
+  api as APIRequestUtils,
   fluxDispatcher as FluxDispatcher,
   guilds as UltimateGuildStore,
   messages as UltimateMessageStore,
   users as UltimateUserStore,
-  api as APIRequestUtils,
 } from "replugged/common";
 import { PluginInjector, PluginLogger } from "../index";
 import { TenorRegex } from "./consts";
