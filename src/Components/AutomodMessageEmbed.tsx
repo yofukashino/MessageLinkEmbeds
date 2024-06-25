@@ -8,7 +8,8 @@ export default React.memo(
     const recipient = UltimateUserStore.getUser(channel.recipients?.[0]);
     const images = Utils.getMessageImages(message);
     const [icon, type] = Utils.getChannelIconAndType({ channel });
-    const compat = Modules.ChatSettingUtils.MessageDisplayCompact.useSetting();
+    const compat = Modules.MessageDisplayCompact.useSetting();
+
     return (
       <Modules.AutomodEmbed
         channel={channel}

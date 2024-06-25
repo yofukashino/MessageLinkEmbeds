@@ -4,6 +4,7 @@ import {
   guilds as UltimateGuildStore,
   messages as UltimateMessageStore,
   users as UltimateUserStore,
+  api as APIRequestUtils,
 } from "replugged/common";
 import { PluginInjector, PluginLogger } from "../index";
 import { TenorRegex } from "./consts";
@@ -51,10 +52,10 @@ export const getChannelIconAndType = ({ channel }: { channel: Types.Channel }): 
       ];
 
     case channel.isGroupDM():
-      return [IconUtils.default.getChannelIconURL(channel) as string, "Group DM"];
+      return [IconUtils.getChannelIconURL(channel) as string, "Group DM"];
     case true:
       return [
-        IconUtils.default.getGuildIconURL(UltimateGuildStore.getGuild(channel.guild_id)) as string,
+        IconUtils.getGuildIconURL(UltimateGuildStore.getGuild(channel.guild_id)) as string,
         "Server",
       ];
   }
@@ -124,7 +125,7 @@ export const resizeToFit = ({
 };
 
 export const fetchMessage = async ({ channelId, messageId }): Promise<Types.Message> => {
-  const { APIRequestUtils, DiscordConstants, MessageCacheActions } = Modules;
+  const { DiscordConstants, MessageCacheActions } = Modules;
   PluginLogger.log(
     `Fetching message for messageId: ${messageId} channelId: ${channelId} at ${new Date()}`,
   );
